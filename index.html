@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You're Still Here</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sage: #4A8C6F;
+    --sage-light: #6aaa8e;
+    --sage-pale: #cce4d8;
+    --earth: #C4A882;
+    --earth-dark: #8B6F4E;
+    --cream: #F8F3EC;
+    --cream-dark: #EDE5D8;
+    --bark: #3D2E1E;
+    --bark-light: #6B5240;
+    --white: #FDFAF6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--cream);
+    color: var(--bark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 1.4rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(248, 243, 236, 0.88);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    border-bottom: 1px solid rgba(196, 168, 130, 0.2);
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--bark);
+    letter-spacing: 0.02em;
+    cursor: pointer;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bark-light);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    cursor: pointer;
+  }
+
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--sage);
+  }
+
+  /* PAGES */
+  .page {
+    display: none;
+    min-height: 100vh;
+    padding-top: 80px;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .page.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HOME PAGE ===== */
+  .home-hero {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .home-hero::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(123, 158, 135, 0.15) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-symbol {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    color: var(--sage);
+    opacity: 0.7;
+    letter-spacing: 0.4em;
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.9; }
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--bark);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--sage);
+  }
+
+  .hero-subtitle {
+    font-family: 'Jost', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--bark-light);
+    max-width: 480px;
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-signature {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    color: var(--earth-dark);
+    letter-spacing: 0.05em;
+    padding: 1rem 2.5rem;
+    border: 1px solid rgba(196, 168, 130, 0.4);
+    border-radius: 50px;
+    background: rgba(196, 168, 130, 0.08);
+  }
+
+  .home-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+  }
+
+  .home-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    border: 1px solid rgba(196, 168, 130, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .home-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--sage-light);
+    box-shadow: 0 12px 40px rgba(123, 158, 135, 0.12);
+  }
+
+  .home-card-icon { font-size: 2rem; margin-bottom: 1rem; }
+
+  .home-card h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--bark);
+    margin-bottom: 0.6rem;
+  }
+
+  .home-card p {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: var(--bark-light);
+    line-height: 1.7;
+  }
+
+  /* ===== SCRIPTS PAGE ===== */
+  .page-header {
+    text-align: center;
+    padding: 4rem 2rem 2rem;
+  }
+
+  .page-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 300;
+    color: var(--bark);
+    margin-bottom: 0.8rem;
+  }
+
+  .page-header p {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--bark-light);
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--sage), transparent);
+    margin: 1.5rem auto;
+  }
+
+  .scripts-grid {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .script-card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid rgba(196, 168, 130, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .script-card:hover {
+    border-color: var(--sage-light);
+    box-shadow: 0 8px 30px rgba(123, 158, 135, 0.1);
+  }
+
+  .script-header {
+    padding: 1.8rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .script-meta { flex: 1; }
+
+  .script-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage);
+    background: var(--sage-pale);
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    margin-bottom: 0.7rem;
+    font-weight: 500;
+  }
+
+  .script-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--bark);
+  }
+
+  .script-toggle {
+    font-size: 1.2rem;
+    color: var(--sage);
+    transition: transform 0.3s ease;
+    margin-left: 1rem;
+  }
+
+  .script-toggle.open { transform: rotate(180deg); }
+
+  .script-body {
+    display: none;
+    padding: 0 2rem 2rem;
+    border-top: 1px solid var(--cream-dark);
+    margin-top: 0;
+  }
+
+  .script-body.open { display: block; }
+
+  .script-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--earth-dark);
+    margin: 1.2rem 0 1.5rem;
+    opacity: 0.8;
+  }
+
+  .script-text {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 2;
+    color: var(--bark);
+    white-space: pre-line;
+  }
+
+  .script-signature {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--sage);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--cream-dark);
+  }
+
+  /* ===== ABOUT PAGE ===== */
+  .about-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  .about-intro {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 3rem;
+    border: 1px solid rgba(196, 168, 130, 0.2);
+    margin-bottom: 2rem;
+  }
+
+  .about-intro p {
+    font-family: 'Jost', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 2;
+    color: var(--bark);
+    margin-bottom: 1.2rem;
+  }
+
+  .about-intro p:last-child { margin-bottom: 0; }
+
+  .about-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--sage);
+    text-align: center;
+    padding: 2.5rem;
+    line-height: 1.6;
+  }
+
+  /* ===== RESOURCES PAGE ===== */
+  .resources-container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .resource-section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--bark);
+    margin-bottom: 1rem;
+  }
+
+  .resource-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .resource-item {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 1.4rem 1.8rem;
+    border: 1px solid rgba(196, 168, 130, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    transition: all 0.3s ease;
+  }
+
+  .resource-item:hover {
+    border-color: var(--sage-light);
+    transform: translateX(4px);
+  }
+
+  .resource-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .resource-info h3 {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--bark);
+    margin-bottom: 0.2rem;
+  }
+
+  .resource-info p {
+    font-size: 0.82rem;
+    font-weight: 300;
+    color: var(--bark-light);
+    line-height: 1.5;
+  }
+
+  .resource-number {
+    margin-left: auto;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--sage);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .crisis-banner {
+    background: linear-gradient(135deg, var(--sage) 0%, var(--earth-dark) 100%);
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+    color: var(--white);
+  }
+
+  .crisis-banner h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 0.8rem;
+  }
+
+  .crisis-banner p {
+    font-size: 0.9rem;
+    font-weight: 300;
+    opacity: 0.9;
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+  }
+
+  .crisis-number {
+    display: inline-block;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.5rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--white);
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--bark-light);
+    border-top: 1px solid rgba(196, 168, 130, 0.2);
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+  }
+
+  footer em {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--sage);
+  }
+
+  @media (max-width: 600px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { gap: 1.2rem; }
+    .nav-links a { font-size: 0.7rem; }
+    .home-cards { padding: 2rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">You're Still Here</div>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')" class="active" id="nav-home">Home</a></li>
+    <li><a onclick="showPage('scripts')" id="nav-scripts">Scripts</a></li>
+    <li><a onclick="showPage('about')" id="nav-about">About</a></li>
+    <li><a onclick="showPage('resources')" id="nav-resources">Resources</a></li>
+    <li><a onclick="showPage('contact')" id="nav-contact">Reach Out</a></li>
+  </ul>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="home-hero">
+    <div class="hero-symbol">✦ ✦ ✦</div>
+    <h1 class="hero-title">You're <em>Still</em><br>Here</h1>
+    <p class="hero-subtitle">A gentle space for the hard days. Comforting words for anyone who needs to hear that they are not alone.</p>
+    <div class="hero-signature">Still here. Still breathing. Still you.</div>
+  </div>
+
+  <div class="home-cards">
+    <div class="home-card" onclick="showPage('scripts')">
+      <div class="home-card-icon">📖</div>
+      <h3>Read the Scripts</h3>
+      <p>Comforting words for the moments when you need them most.</p>
+    </div>
+    <div class="home-card" onclick="showPage('about')">
+      <div class="home-card-icon" style="font-size:1.4rem;letter-spacing:0.2em;color:var(--sage);">✦ ✦</div>
+      <h3>Our Story</h3>
+      <p>Why this space exists and who it is here for.</p>
+    </div>
+    <div class="home-card" onclick="showPage('contact')">
+      <div class="home-card-icon">✉️</div>
+      <h3>Reach Out</h3>
+      <p>Leave a message. Tell us your name. We read every single one.</p>
+    </div>
+    <div class="home-card" onclick="showPage('resources')">
+      <div class="home-card-icon">🤍</div>
+      <h3>Get Support</h3>
+      <p>Crisis lines and mental health resources, here whenever you need them.</p>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://youtube.com/@heyyourestillhere" target="_blank" style="color:var(--sage); font-size:0.78rem; letter-spacing:0.05em; text-decoration:none;">▶ YouTube</a> &nbsp;·&nbsp; <a href="https://findahelpline.com" target="_blank" style="color:var(--sage); font-size:0.78rem; text-decoration:none;">Crisis Support</a><br><br><strong>This content is for emotional comfort only and is not a substitute for professional mental health support.<br>
+    If you are in crisis, please visit <a href="https://findahelpline.com" target="_blank" style="color:inherit;">findahelpline.com</a> to find your local crisis line.</strong>
+  </footer>
+</div>
+
+<!-- SCRIPTS PAGE -->
+<div class="page" id="page-scripts">
+  <div class="page-header">
+    <h1>The Scripts</h1>
+    <div class="divider"></div>
+    <p>Words for the moments when you feel alone. Read them slowly, or listen to the audio version — let them find their way to you.</p>
+  </div>
+
+  <div class="scripts-grid">
+    <div class="script-card">
+      <div class="script-header" onclick="toggleScript(this)">
+        <div class="script-meta">
+          <span class="script-tag">Hard Days</span>
+          <div class="script-title">You Made It Through Today</div>
+        </div>
+        <div class="script-toggle">▾</div>
+      </div>
+      <div class="script-body">
+        <p class="script-note">For when the day was heavy and you don't know why. &nbsp;·&nbsp; <a href="https://youtube.com/@heyyourestillhere" target="_blank" style="color:var(--sage); text-decoration:none; font-style:normal; font-size:0.75rem; letter-spacing:0.05em;">▶ Listen on YouTube</a></p>
+        <div class="script-text">Hey. I'm glad you're here.
+
+I don't know what today looked like for you. Maybe things went wrong in ways you couldn't control. Maybe you said something you regret, or something was said to you that hurt more than it should have. Maybe nothing dramatic happened at all — you just felt heavy all day, and you don't even know why. And somehow that makes it worse.
+
+Whatever it was — it's okay. You don't have to explain it.
+
+You made it through today. Do you realize that? However messy, however painful, however exhausting — you got through every single minute of it. And you're still here. That matters more than you know.
+
+Bad days have a way of making everything feel permanent. Like this heaviness is just... who you are now. Like tomorrow will be exactly the same. But that's the exhaustion talking. That's not the truth.
+
+The truth is — you are not your worst day. You are not the mistake you made, or the thing you couldn't finish, or the way you broke down when you didn't want to. You are someone who is trying. Even on the days when trying looks like just getting through.
+
+So tonight, I want you to put it all down. Just for now. You don't have to fix anything tonight. You don't have to figure anything out. You just have to rest.
+
+You are allowed to rest.
+
+Tomorrow is a completely different day. A fresh page. And you'll meet it when you get there. But right now — right now you just need to know that you're not alone in this. Someone out there gets it. And someone out there is rooting for you, even on the days you can't root for yourself.
+
+You did good today. You really did.
+
+Get some rest. And when you wake up tomorrow, remember — you are still here. Still breathing. Still you. And that is everything.</div>
+        <div class="script-signature">— You're Still Here ✦</div>
+      </div>
+    </div>
+
+    <div class="script-card">
+      <div class="script-header" onclick="toggleScript(this)">
+        <div class="script-meta">
+          <span class="script-tag">Coming Soon</span>
+          <div class="script-title">More scripts on the way...</div>
+        </div>
+        <div class="script-toggle">▾</div>
+      </div>
+      <div class="script-body">
+        <p class="script-note">New comforting scripts are being written with love. Check back soon. 🌿</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://youtube.com/@heyyourestillhere" target="_blank" style="color:var(--sage); font-size:0.78rem; letter-spacing:0.05em; text-decoration:none;">▶ YouTube</a> &nbsp;·&nbsp; <a href="https://findahelpline.com" target="_blank" style="color:var(--sage); font-size:0.78rem; text-decoration:none;">Crisis Support</a><br><br><strong>This content is for emotional comfort only and is not a substitute for professional mental health support.<br>
+    If you are in crisis, please visit <a href="https://findahelpline.com" target="_blank" style="color:inherit;">findahelpline.com</a> to find your local crisis line.</strong>
+  </footer>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page" id="page-about">
+  <div class="page-header">
+    <h1>Our Story</h1>
+    <div class="divider"></div>
+    <p>Why this space exists.</p>
+  </div>
+
+  <div class="about-container">
+    <div class="about-intro">
+      <p>You're Still Here was born from a simple, aching wish — to find a voice that would just say: <em>"I know. I get it. And it's going to be okay."</em></p>
+      <p>So many of us go through the hardest moments alone. Not because no one cares — but because it's 3am, or the words won't come, or we don't want to be a burden. We scroll looking for something that feels like a hand on the shoulder. And we don't find it.</p>
+      <p>This space exists to be that voice. No advice. No fixing. Just warmth, honesty, and the reminder that you are not the only one who has felt this way.</p>
+      <p>The person behind these words has been there — in the dark, at 3am, looking for something that felt like a hand on the shoulder. They couldn't find it. So they built it instead.</p>
+      <p>This is for you. All of it. 🤍</p>
+    </div>
+
+    <div class="about-quote">
+      "You are not your worst day.<br>You are someone who is trying."
+      <div style="font-family:'Jost',sans-serif; font-size:0.75rem; font-style:normal; letter-spacing:0.1em; text-transform:uppercase; color:var(--earth-dark); margin-top:1.2rem; opacity:0.8;">— You're Still Here</div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://youtube.com/@heyyourestillhere" target="_blank" style="color:var(--sage); font-size:0.78rem; letter-spacing:0.05em; text-decoration:none;">▶ YouTube</a> &nbsp;·&nbsp; <a href="https://findahelpline.com" target="_blank" style="color:var(--sage); font-size:0.78rem; text-decoration:none;">Crisis Support</a><br><br><strong>This content is for emotional comfort only and is not a substitute for professional mental health support.<br>
+    If you are in crisis, please visit <a href="https://findahelpline.com" target="_blank" style="color:inherit;">findahelpline.com</a> to find your local crisis line.</strong>
+  </footer>
+</div>
+
+<!-- RESOURCES PAGE -->
+<div class="page" id="page-resources">
+  <div class="page-header">
+    <h1>You Are Not Alone</h1>
+    <div class="divider"></div>
+    <p>You don't have to go through this alone. Please reach out — you deserve support.</p>
+  </div>
+
+  <div class="resources-container">
+
+    <div class="crisis-banner" id="crisis-banner">
+      <h2>In Crisis Right Now?</h2>
+      <p>Please reach out immediately. Someone is always there to listen.</p>
+      <div id="crisis-loading" style="font-size:0.9rem;opacity:0.8;">Finding your local crisis line... 🌿</div>
+      <div id="crisis-info" style="display:none;">
+        <div class="crisis-number" id="crisis-number"></div>
+        <p style="margin-top:0.5rem;font-size:0.8rem;" id="crisis-desc"></p>
+      </div>
+      <a id="crisis-fallback" href="https://findahelpline.com" target="_blank" style="display:none;color:white;font-size:0.85rem;margin-top:1rem;text-decoration:underline;text-underline-offset:3px;">🌍 Find your country's crisis line → findahelpline.com</a>
+    </div>
+
+    <div class="resource-section">
+      <h2>Crisis Lines</h2>
+      <div class="resource-cards" id="crisis-cards">
+        <div class="resource-item">
+          <div class="resource-icon">🌍</div>
+          <div class="resource-info">
+            <h3>Detecting your location...</h3>
+            <p>We'll show the most relevant crisis lines for your country.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resource-section">
+      <h2>Mental Health Support</h2>
+      <div class="resource-cards">
+        <div class="resource-item">
+          <div class="resource-icon">🧠</div>
+          <div class="resource-info">
+            <h3>NAMI Helpline</h3>
+            <p>National Alliance on Mental Illness. Call 1-800-950-6264, Mon–Fri.</p>
+          </div>
+        </div>
+        <div class="resource-item">
+          <div class="resource-icon">🤝</div>
+          <div class="resource-info">
+            <h3>Open Path Collective</h3>
+            <p>Affordable therapy sessions ($30–$80) with licensed therapists. openpathcollective.org</p>
+          </div>
+        </div>
+        <div class="resource-item">
+          <div class="resource-icon">📱</div>
+          <div class="resource-info">
+            <h3>Wysa</h3>
+            <p>Free AI-powered mental wellness app with evidence-based tools for anxiety & low mood.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <a href="https://youtube.com/@heyyourestillhere" target="_blank" style="color:var(--sage); font-size:0.78rem; letter-spacing:0.05em; text-decoration:none;">▶ YouTube</a> &nbsp;·&nbsp; <a href="https://findahelpline.com" target="_blank" style="color:var(--sage); font-size:0.78rem; text-decoration:none;">Crisis Support</a><br><br><strong>This content is for emotional comfort only and is not a substitute for professional mental health support.<br>
+    If you are in crisis, please visit <a href="https://findahelpline.com" target="_blank" style="color:inherit;">findahelpline.com</a> to find your local crisis line.</strong>
+  </footer>
+</div>
+
+
+<!-- CONTACT PAGE -->
+<div class="page" id="page-contact">
+  <div class="page-header">
+    <h1>Reach Out</h1>
+    <div class="divider"></div>
+    <p>You don't have to say anything profound. Just say hello. We read every message. 🤍</p>
+  </div>
+
+  <div style="max-width:600px;margin:0 auto;padding:2rem 2rem 4rem;">
+    <div style="background:var(--white);border-radius:20px;padding:3rem;border:1px solid rgba(196,168,130,0.2);">
+      <form action="https://formspree.io/f/xjgavrzj" method="POST" id="contact-form">
+
+        <div style="margin-bottom:1.6rem;">
+          <label style="display:block;font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--bark-light);margin-bottom:0.6rem;font-weight:500;">Your Name <span style="color:var(--sage)">*</span></label>
+          <input type="text" name="name" required placeholder="What should we call you?"
+            style="width:100%;padding:0.9rem 1.2rem;border:1px solid rgba(196,168,130,0.35);border-radius:10px;background:var(--cream);font-family:'Jost',sans-serif;font-size:0.95rem;font-weight:300;color:var(--bark);outline:none;transition:border-color 0.3s;"
+            onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='rgba(196,168,130,0.35)'">
+        </div>
+
+        <div style="margin-bottom:1.6rem;">
+          <label style="display:block;font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--bark-light);margin-bottom:0.6rem;font-weight:500;">Your Message <span style="color:var(--sage)">*</span></label>
+          <textarea name="message" required placeholder="Anything at all. We're listening." rows="5"
+            style="width:100%;padding:0.9rem 1.2rem;border:1px solid rgba(196,168,130,0.35);border-radius:10px;background:var(--cream);font-family:'Jost',sans-serif;font-size:0.95rem;font-weight:300;color:var(--bark);outline:none;resize:vertical;transition:border-color 0.3s;"
+            onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='rgba(196,168,130,0.35)'"></textarea>
+        </div>
+
+        <div style="margin-bottom:2rem;">
+          <label style="display:block;font-size:0.78rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--bark-light);margin-bottom:0.6rem;font-weight:500;">How are you feeling today? <span style="font-style:italic;text-transform:none;letter-spacing:0;font-size:0.75rem;opacity:0.7;">(optional)</span></label>
+          <input type="text" name="feeling" placeholder="e.g. tired, okay, not great, hopeful..."
+            style="width:100%;padding:0.9rem 1.2rem;border:1px solid rgba(196,168,130,0.35);border-radius:10px;background:var(--cream);font-family:'Jost',sans-serif;font-size:0.95rem;font-weight:300;color:var(--bark);outline:none;transition:border-color 0.3s;"
+            onfocus="this.style.borderColor='var(--sage)'" onblur="this.style.borderColor='rgba(196,168,130,0.35)'">
+        </div>
+
+        <button type="submit"
+          style="width:100%;padding:1rem;background:var(--sage);color:white;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:0.85rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:background 0.3s;"
+          onmouseover="this.style.background='var(--earth-dark)'" onmouseout="this.style.background='var(--sage)'">
+          Send my message
+        </button>
+
+      </form>
+
+      <div id="form-success" style="display:none;text-align:center;padding:2rem 0;">
+        <div style="font-size:1.5rem;margin-bottom:1rem;">✦</div>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:var(--bark);margin-bottom:0.8rem;">Thank you for reaching out.</p>
+        <p style="font-size:0.9rem;font-weight:300;color:var(--bark-light);line-height:1.8;">Your message was received. You are not alone. 🤍</p>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:0.78rem;color:var(--bark-light);margin-top:1.5rem;font-weight:300;line-height:1.8;">
+      Your message goes directly to us. Your email is never required.<br>
+      <strong>If you are in crisis, please visit <a href="https://findahelpline.com" target="_blank" style="color:var(--sage);">findahelpline.com</a> for immediate support.</strong>
+    </p>
+  </div>
+
+  <footer>
+    <a href="https://youtube.com/@heyyourestillhere" target="_blank" style="color:var(--sage); font-size:0.78rem; letter-spacing:0.05em; text-decoration:none;">▶ YouTube</a> &nbsp;·&nbsp; <a href="https://findahelpline.com" target="_blank" style="color:var(--sage); font-size:0.78rem; text-decoration:none;">Crisis Support</a><br><br><strong>This content is for emotional comfort only and is not a substitute for professional mental health support.<br>
+    If you are in crisis, please visit <a href="https://findahelpline.com" target="_blank" style="color:inherit;">findahelpline.com</a> to find your local crisis line.</strong>
+  </footer>
+</div>
+
+<script>
+  const crisisData = {
+    US: { number: "Call or Text 988", desc: "Suicide & Crisis Lifeline — free, 24/7", lines: [
+      { icon: "📞", name: "988 Suicide & Crisis Lifeline", desc: "Call or text 988, 24/7. Free and confidential.", number: "988" },
+      { icon: "💬", name: "Crisis Text Line", desc: "Text HOME to 741741. Free, 24/7.", number: "741741" }
+    ]},
+    GB: { number: "Call 116 123", desc: "Samaritans — free, 24/7", lines: [
+      { icon: "📞", name: "Samaritans", desc: "Call 116 123, free, 24/7. Available across the UK.", number: "116 123" },
+      { icon: "💬", name: "Crisis Text Line UK", desc: "Text SHOUT to 85258. Free, 24/7.", number: "85258" }
+    ]},
+    AU: { number: "Call 13 11 14", desc: "Lifeline Australia — free, 24/7", lines: [
+      { icon: "📞", name: "Lifeline", desc: "Call 13 11 14, free, 24/7.", number: "13 11 14" },
+      { icon: "💬", name: "Beyond Blue", desc: "Call 1300 22 4636 or chat online. 24/7.", number: "1300 22 4636" }
+    ]},
+    CA: { number: "Call or Text 988", desc: "Canada Suicide Crisis Helpline — free, 24/7", lines: [
+      { icon: "📞", name: "988 Crisis Helpline", desc: "Call or text 988. Free, 24/7, bilingual.", number: "988" },
+      { icon: "💬", name: "Crisis Text Line Canada", desc: "Text HOME to 686868. Free, 24/7.", number: "686868" }
+    ]},
+    IE: { number: "Call 116 123", desc: "Samaritans Ireland — free, 24/7", lines: [
+      { icon: "📞", name: "Samaritans Ireland", desc: "Call 116 123, free, 24/7.", number: "116 123" },
+      { icon: "💬", name: "Crisis Text Line Ireland", desc: "Text HELLO to 50808. Free, 24/7.", number: "50808" }
+    ]},
+    NZ: { number: "Call or Text 1737", desc: "Need to Talk? — free, 24/7", lines: [
+      { icon: "📞", name: "Need to Talk? (1737)", desc: "Call or text 1737, free, 24/7.", number: "1737" },
+      { icon: "📞", name: "Lifeline New Zealand", desc: "Call 0800 543 354, free, 24/7.", number: "0800 543 354" }
+    ]},
+    IN: { number: "Call iCall: 9152987821", desc: "iCall — Mon–Sat, 8am–10pm IST", lines: [
+      { icon: "📞", name: "iCall", desc: "Call 9152987821. Professional counselling support.", number: "9152987821" },
+      { icon: "📞", name: "Vandrevala Foundation", desc: "Call 1860-2662-345, free, 24/7.", number: "1860-2662-345" }
+    ]},
+    ZA: { number: "Call 0800 567 567", desc: "SADAG — free, 24/7", lines: [
+      { icon: "📞", name: "SADAG Suicide Crisis Line", desc: "Call 0800 567 567. Free, 24/7.", number: "0800 567 567" },
+      { icon: "💬", name: "SADAG SMS Line", desc: "SMS 31393. Available 24/7.", number: "31393" }
+    ]},
+    DE: { number: "Call 0800 111 0 111", desc: "Telefonseelsorge — free, 24/7", lines: [
+      { icon: "📞", name: "Telefonseelsorge", desc: "Call 0800 111 0 111 or 0800 111 0 222. Free, 24/7.", number: "0800 111 0 111" }
+    ]},
+    FR: { number: "Call 3114", desc: "Numéro National Prévention Suicide — free, 24/7", lines: [
+      { icon: "📞", name: "3114 — Prévention Suicide", desc: "Call 3114. Free, 24/7.", number: "3114" }
+    ]},
+  };
+
+  const fallback = {
+    number: null,
+    lines: [
+      { icon: "🌍", name: "Find a Helpline", desc: "Visit findahelpline.com to find your country's crisis line instantly.", number: null, link: "https://findahelpline.com" }
+    ]
+  };
+
+  async function detectCrisisLines() {
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      const code = data.country_code;
+      const country = crisisData[code] || null;
+
+      const loading = document.getElementById('crisis-loading');
+      const info = document.getElementById('crisis-info');
+      const fallbackLink = document.getElementById('crisis-fallback');
+      const cards = document.getElementById('crisis-cards');
+
+      if (country) {
+        loading.style.display = 'none';
+        info.style.display = 'block';
+        document.getElementById('crisis-number').textContent = country.number;
+        document.getElementById('crisis-desc').textContent = country.desc;
+
+        cards.innerHTML = country.lines.map(l => `
+          <div class="resource-item">
+            <div class="resource-icon">${l.icon}</div>
+            <div class="resource-info">
+              <h3>${l.name}</h3>
+              <p>${l.desc}</p>
+            </div>
+            ${l.number ? `<div class="resource-number">${l.number}</div>` : ''}
+          </div>
+        `).join('') + `
+          <div class="resource-item">
+            <div class="resource-icon">🌍</div>
+            <div class="resource-info">
+              <h3>More lines for your country</h3>
+              <p>Visit <a href="https://findahelpline.com" target="_blank" style="color:var(--sage)">findahelpline.com</a> for a full list of support in your area.</p>
+            </div>
+          </div>`;
+      } else {
+        loading.style.display = 'none';
+        fallbackLink.style.display = 'block';
+        cards.innerHTML = `
+          <div class="resource-item">
+            <div class="resource-icon">🌍</div>
+            <div class="resource-info">
+              <h3>Find Your Local Crisis Line</h3>
+              <p>Visit <a href="https://findahelpline.com" target="_blank" style="color:var(--sage)">findahelpline.com</a> — it will show you the right number for your country instantly.</p>
+            </div>
+          </div>`;
+      }
+    } catch (e) {
+      document.getElementById('crisis-loading').style.display = 'none';
+      document.getElementById('crisis-fallback').style.display = 'block';
+      document.getElementById('crisis-cards').innerHTML = `
+        <div class="resource-item">
+          <div class="resource-icon">🌍</div>
+          <div class="resource-info">
+            <h3>Find Your Local Crisis Line</h3>
+            <p>Visit <a href="https://findahelpline.com" target="_blank" style="color:var(--sage)">findahelpline.com</a> to find the right number for your country.</p>
+          </div>
+        </div>`;
+    }
+  }
+
+  detectCrisisLines();
+
+  const form = document.getElementById('contact-form');
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = new FormData(form);
+      const res = await fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('form-success').style.display = 'block';
+      }
+    });
+  }
+
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleScript(header) {
+    const body = header.nextElementSibling;
+    const toggle = header.querySelector('.script-toggle');
+    body.classList.toggle('open');
+    toggle.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
